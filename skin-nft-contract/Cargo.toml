@@ -1,5 +1,5 @@
 [package]
-name = "paras-nft-contract"
+name = "skin-nft-contract"
 version = "0.1.0"
 authors = ["Irfianto <irfi@paras.id>"]
 edition = "2018"

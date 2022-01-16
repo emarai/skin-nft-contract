@@ -1,5 +1,5 @@
 [package]
-name = "paras-nft-contract-wrapper"
+name = "skins-nft-contract-wrapper"
 version = "0.0.1"
 authors = ["Irfianto <irfi@paras.id>"]
 edition = "2018"
@@ -8,7 +8,7 @@ edition = "2018"
 near-sdk = "=3.1.0"
 near-contract-standards = "3.2.0"
 near-sdk-sim = "=3.1.0"
-paras-nft-contract = { path = "./paras-nft-contract" }
+skin-nft-contract = { path = "./skin-nft-contract" }
 
 [profile.release]
 codegen-units = 1
@@ -20,5 +20,5 @@ overflow-checks = true
 
 [workspace]
 members = [
-  "paras-nft-contract",
+  "skin-nft-contract",
 ]
