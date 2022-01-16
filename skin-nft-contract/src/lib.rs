@@ -14,7 +14,7 @@ use near_sdk::{
     PanicOnDefault, Promise, PromiseOrValue, Gas, ext_contract
 };
 use near_sdk::serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use near_sdk::env::is_valid_account_id;
 
 pub mod event;
@@ -83,7 +83,8 @@ pub struct TokenSeries {
 	tokens: UnorderedSet<TokenId>,
     price: Option<Balance>,
     is_mintable: bool,
-    royalty: HashMap<AccountId, u32>
+    royalty: HashMap<AccountId, u32>,
+    fuse_requirements: Option<HashSet<TokenSeriesId>>
 }
 
 #[derive(Serialize, Deserialize)]
@@ -184,6 +185,7 @@ impl Contract {
         token_metadata: TokenMetadata,
         price: Option<U128>,
         royalty: Option<HashMap<AccountId, u32>>,
+        fuse_requirements: Option<HashSet<TokenSeriesId>>,
     ) -> TokenSeriesJson {
         assert_eq!(
             env::predecessor_account_id(),
@@ -250,6 +252,7 @@ impl Contract {
             price: price_res,
             is_mintable: true,
             royalty: royalty_res.clone(),
+            fuse_requirements
         });
 
         env::log(
@@ -332,6 +335,31 @@ impl Contract {
         );
 
         token_id
+    }
+
+    #[payable]
+    pub fn nft_fuse(
+        &mut self,
+        token_ids: Vec<TokenId>,
+        target_token_series_id: TokenSeriesId
+    ) -> Option<TokenId> {
+        let token_series: TokenSeries = self.token_series_by_id.get(&target_token_series_id).expect("Skins: Token series not exist");
+        let mut fuse_requirements = token_series.fuse_requirements.unwrap();
+        for token_id in token_ids.clone() {
+            let mut token_id_iter = token_id.split(TOKEN_DELIMETER);
+            let token_series_id: TokenSeriesId = token_id_iter.next().unwrap().parse().unwrap();
+            if fuse_requirements.contains(token_series_id.as_str()) {
+                fuse_requirements.remove(token_series_id.as_str());
+            }
+        };
+        if fuse_requirements.is_empty() {
+            for token_id in token_ids {
+                self.nft_burn(token_id);
+            }
+            Some(self._nft_mint_series(target_token_series_id, env::predecessor_account_id()))
+        } else {
+            None
+        }
     }
 
     #[payable]
@@ -703,7 +731,7 @@ impl Contract {
         // CUSTOM (switch metadata for the token_series metadata)
         let mut token_id_iter = token_id.split(TOKEN_DELIMETER);
         let token_series_id = token_id_iter.next().unwrap().parse().unwrap();
-                let series_metadata = self.token_series_by_id.get(&token_series_id).unwrap().metadata;
+        let series_metadata = self.token_series_by_id.get(&token_series_id).unwrap().metadata;
 
         let mut token_metadata = self.tokens.token_metadata_by_id.as_ref().unwrap().get(&token_id).unwrap();
 
@@ -1142,6 +1170,7 @@ mod tests {
             },
             price,
             Some(royalty.clone()),
+            None
         );
     }
 
