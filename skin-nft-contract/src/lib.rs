@@ -323,7 +323,7 @@ impl Contract {
         &mut self,
         token_ids: Vec<TokenId>,
         target_token_series_id: TokenSeriesId,
-        account_id: ValidAccountId,
+        receiver_id: ValidAccountId,
     ) -> Option<TokenId> {
 
         assert_eq!(
@@ -335,7 +335,7 @@ impl Contract {
         let token_series: TokenSeries = self.token_series_by_id.get(&target_token_series_id).expect("Skins: Token series not exist");
         let mut fuse_requirements = token_series.fuse_requirements.unwrap();
         for token_id in token_ids.clone() {
-            assert_eq!(self.tokens.owner_by_id.get(&token_id).unwrap(), account_id.to_string(), "Skins: token_id is not owned by account_id");
+            assert_eq!(self.tokens.owner_by_id.get(&token_id).unwrap(), receiver_id.to_string(), "Skins: token_id is not owned by receiver_id");
             let mut token_id_iter = token_id.split(TOKEN_DELIMETER);
             let token_series_id: TokenSeriesId = token_id_iter.next().unwrap().parse().unwrap();
             if fuse_requirements.contains(token_series_id.as_str()) {
@@ -344,11 +344,11 @@ impl Contract {
         };
         if fuse_requirements.is_empty() {
             for token_id in token_ids {
-                self.nft_burn(token_id);
+                self._nft_burn(receiver_id.to_string(), token_id);
             }
-            let token_id: TokenId = self._nft_mint_series(target_token_series_id, account_id.to_string());
+            let token_id: TokenId = self._nft_mint_series(target_token_series_id, receiver_id.to_string());
             NearEvent::log_nft_mint(
-                account_id.to_string(),
+                receiver_id.to_string(),
                 vec![token_id.clone()],
                 None
             );
@@ -611,6 +611,10 @@ impl Contract {
             "Token owner only"
         );
 
+        self._nft_burn(owner_id, token_id);
+    }
+
+    fn _nft_burn(&mut self, owner_id: AccountId, token_id: TokenId) {
         if let Some(next_approval_id_by_id) = &mut self.tokens.next_approval_id_by_id {
             next_approval_id_by_id.remove(&token_id);
         }
