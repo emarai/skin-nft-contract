@@ -216,7 +216,7 @@ fn simulate_buy() {
 
     let treasury_balance = treasury.account().unwrap().amount;
 
-    alice.call(
+    root.call(
         nft.account_id(),
         "nft_create_series",
         &json!({
@@ -235,9 +235,9 @@ fn simulate_buy() {
         to_yocto("1")
     );
 
-    let alice_balance = alice.account().unwrap().amount;
+    let root_balance = root.account().unwrap().amount;
 
-    root.call(
+    alice.call(
         nft.account_id(),
         "nft_buy",
         &json!({
@@ -252,8 +252,8 @@ fn simulate_buy() {
     let for_seller = to_yocto("1") - for_treasury;
 
     let diff_after_sell_treasury = treasury.account().unwrap().amount - treasury_balance;
-    let diff_after_sell_alice = alice.account().unwrap().amount - alice_balance;
+    let diff_after_sell_root = root.account().unwrap().amount - root_balance;
 
     assert_eq!(for_treasury, diff_after_sell_treasury);
-    assert_eq!(for_seller, diff_after_sell_alice);
+    assert_eq!(for_seller, diff_after_sell_root);
 }

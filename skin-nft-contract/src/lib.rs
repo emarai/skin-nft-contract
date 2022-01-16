@@ -185,6 +185,12 @@ impl Contract {
         price: Option<U128>,
         royalty: Option<HashMap<AccountId, u32>>,
     ) -> TokenSeriesJson {
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.tokens.owner_id,
+            "Skins: Owner only"
+        );
+
         let initial_storage_usage = env::storage_usage();
         let caller_id = env::predecessor_account_id();
 
@@ -1143,7 +1149,7 @@ mod tests {
     fn test_create_series() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1160,7 +1166,7 @@ mod tests {
         let nft_series_return = contract.nft_get_series_single("1".to_string());
         assert_eq!(
             nft_series_return.creator_id,
-            accounts(1).to_string()
+            accounts(0).to_string()
         );
 
         assert_eq!(
@@ -1193,7 +1199,7 @@ mod tests {
     fn test_buy() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1227,7 +1233,7 @@ mod tests {
     fn test_mint() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1238,7 +1244,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1257,7 +1263,7 @@ mod tests {
     fn test_invalid_mint_non_mintable() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1268,14 +1274,14 @@ mod tests {
         create_series(&mut contract, &royalty, None, None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(1)
             .build()
         );
         contract.nft_set_series_non_mintable("1".to_string());
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1288,7 +1294,7 @@ mod tests {
     fn test_invalid_mint_above_copies() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1299,7 +1305,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, Some(1));
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1312,7 +1318,7 @@ mod tests {
     fn test_decrease_copies() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1323,7 +1329,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, Some(5));
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1332,7 +1338,7 @@ mod tests {
         contract.nft_mint("1".to_string(), accounts(2));
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(1)
             .build()
         );
@@ -1345,7 +1351,7 @@ mod tests {
     fn test_invalid_decrease_copies() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1356,7 +1362,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, Some(5));
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1365,7 +1371,7 @@ mod tests {
         contract.nft_mint("1".to_string(), accounts(2));
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(1)
             .build()
         );
@@ -1378,7 +1384,7 @@ mod tests {
     fn test_invalid_buy_price_null() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1389,7 +1395,7 @@ mod tests {
         create_series(&mut contract, &royalty, Some(U128::from(1 * 10u128.pow(24))), None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(1)
             .build()
         );
@@ -1415,7 +1421,7 @@ mod tests {
     fn test_nft_burn() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1426,7 +1432,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1448,7 +1454,7 @@ mod tests {
     fn test_nft_transfer() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1459,7 +1465,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1485,7 +1491,7 @@ mod tests {
     fn test_nft_transfer_unsafe() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1496,7 +1502,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
@@ -1521,7 +1527,7 @@ mod tests {
     fn test_nft_transfer_payout() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_CREATE_SERIES)
             .build()
         );
@@ -1532,7 +1538,7 @@ mod tests {
         create_series(&mut contract, &royalty, None, None);
 
         testing_env!(context
-            .predecessor_account_id(accounts(1))
+            .predecessor_account_id(accounts(0))
             .attached_deposit(STORAGE_FOR_MINT)
             .build()
         );
