@@ -1,4 +1,4 @@
-use paras_nft_contract::ContractContract as Contract;
+use skin_nft_contract::ContractContract as Contract;
 use near_sdk_sim::{
     deploy, init_simulator, to_yocto, ContractAccount, UserAccount, DEFAULT_GAS
 };
