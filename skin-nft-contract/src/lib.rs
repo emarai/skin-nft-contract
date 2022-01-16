@@ -107,7 +107,7 @@ pub struct Contract {
     treasury_id: AccountId,
 }
 
-const DATA_IMAGE_SVG_PARAS_ICON: &str = "data:image/svg+xml,%3Csvg width='1080' height='1080' viewBox='0 0 1080 1080' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1080' height='1080' rx='10' fill='%230000BA'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M335.238 896.881L240 184L642.381 255.288C659.486 259.781 675.323 263.392 689.906 266.718C744.744 279.224 781.843 287.684 801.905 323.725C827.302 369.032 840 424.795 840 491.014C840 557.55 827.302 613.471 801.905 658.779C776.508 704.087 723.333 726.74 642.381 726.74H468.095L501.429 896.881H335.238ZM387.619 331.329L604.777 369.407C614.008 371.807 622.555 373.736 630.426 375.513C660.02 382.193 680.042 386.712 690.869 405.963C704.575 430.164 711.428 459.95 711.428 495.321C711.428 530.861 704.575 560.731 690.869 584.932C677.163 609.133 648.466 621.234 604.777 621.234H505.578L445.798 616.481L387.619 331.329Z' fill='white'/%3E%3C/svg%3E";
+const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E";
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
@@ -131,10 +131,10 @@ impl Contract {
             treasury_id,
             NFTContractMetadata {
                 spec: NFT_METADATA_SPEC.to_string(),
-                name: "Paras Collectibles".to_string(),
-                symbol: "PARAS".to_string(),
-                icon: Some(DATA_IMAGE_SVG_PARAS_ICON.to_string()),
-                base_uri: Some("https://ipfs.fleek.co/ipfs".to_string()),
+                name: "Skins Collectible".to_string(),
+                symbol: "SKINS".to_string(),
+                icon: Some(DATA_IMAGE_SVG_NEAR_ICON.to_string()),
+                base_uri: Some("https://ipfs.io/ipfs".to_string()),
                 reference: None,
                 reference_hash: None,
             },
@@ -170,7 +170,7 @@ impl Contract {
         assert_eq!(
             env::predecessor_account_id(),
             self.tokens.owner_id,
-            "Paras: Owner only"
+            "Skins: Owner only"
         );
         self.treasury_id = treasury_id.to_string();
     }
@@ -189,18 +189,18 @@ impl Contract {
         let caller_id = env::predecessor_account_id();
 
         if creator_id.is_some() {
-            assert_eq!(creator_id.unwrap().to_string(), caller_id, "Paras: Caller is not creator_id");
+            assert_eq!(creator_id.unwrap().to_string(), caller_id, "Skins: Caller is not creator_id");
         }
 
         let token_series_id = format!("{}", (self.token_series_by_id.len() + 1));
 
         assert!(
             self.token_series_by_id.get(&token_series_id).is_none(),
-            "Paras: duplicate token_series_id"
+            "Skins: duplicate token_series_id"
         );
 
         let title = token_metadata.title.clone();
-        assert!(title.is_some(), "Paras: token_metadata.title is required");
+        assert!(title.is_some(), "Skins: token_metadata.title is required");
         
 
         let mut total_perpetual = 0;
@@ -218,11 +218,11 @@ impl Contract {
             HashMap::new()
         };
 
-        assert!(total_accounts <= 10, "Paras: royalty exceeds 10 accounts");
+        assert!(total_accounts <= 10, "Skins: royalty exceeds 10 accounts");
 
         assert!(
             total_perpetual <= 9000,
-            "Paras Exceeds maximum royalty -> 9000",
+            "Skins Exceeds maximum royalty -> 9000",
         );
 
         let price_res: Option<u128> = if price.is_some() {
@@ -279,12 +279,12 @@ impl Contract {
     ) -> TokenId {
         let initial_storage_usage = env::storage_usage();
 
-        let token_series = self.token_series_by_id.get(&token_series_id).expect("Paras: Token series not exist");
-        let price: u128 = token_series.price.expect("Paras: not for sale");
+        let token_series = self.token_series_by_id.get(&token_series_id).expect("Skins: Token series not exist");
+        let price: u128 = token_series.price.expect("Skins: not for sale");
         let attached_deposit = env::attached_deposit();
         assert!(
             attached_deposit >= price,
-            "Paras: attached deposit is less than price : {}",
+            "Skins: attached deposit is less than price : {}",
             price
         );
         let token_id: TokenId = self._nft_mint_series(token_series_id, receiver_id.to_string());
@@ -313,8 +313,8 @@ impl Contract {
     ) -> TokenId {
         let initial_storage_usage = env::storage_usage();
 
-        let token_series = self.token_series_by_id.get(&token_series_id).expect("Paras: Token series not exist");
-        assert_eq!(env::predecessor_account_id(), token_series.creator_id, "Paras: not creator");
+        let token_series = self.token_series_by_id.get(&token_series_id).expect("Skins: Token series not exist");
+        assert_eq!(env::predecessor_account_id(), token_series.creator_id, "Skins: not creator");
         let token_id: TokenId = self._nft_mint_series(token_series_id, receiver_id.to_string());
 
         refund_deposit(env::storage_usage() - initial_storage_usage, 0);
@@ -337,8 +337,8 @@ impl Contract {
     ) -> Option<Promise> {
         let initial_storage_usage = env::storage_usage();
 
-        let token_series = self.token_series_by_id.get(&token_series_id).expect("Paras: Token series not exist");
-        assert_eq!(env::predecessor_account_id(), token_series.creator_id, "Paras: not creator");
+        let token_series = self.token_series_by_id.get(&token_series_id).expect("Skins: Token series not exist");
+        assert_eq!(env::predecessor_account_id(), token_series.creator_id, "Skins: not creator");
         let token_id: TokenId = self._nft_mint_series(token_series_id, token_series.creator_id.clone());
 
         // Need to copy the nft_approve code here to solve the gas problem
@@ -387,10 +387,10 @@ impl Contract {
         token_series_id: TokenSeriesId, 
         receiver_id: AccountId
     ) -> TokenId {
-        let mut token_series = self.token_series_by_id.get(&token_series_id).expect("Paras: Token series not exist");
+        let mut token_series = self.token_series_by_id.get(&token_series_id).expect("Skins: Token series not exist");
         assert!(
             token_series.is_mintable,
-            "Paras: Token series is not mintable"
+            "Skins: Token series is not mintable"
         );
 
         let num_tokens = token_series.tokens.len();
@@ -455,19 +455,19 @@ impl Contract {
         assert_eq!(
             env::predecessor_account_id(),
             token_series.creator_id,
-            "Paras: Creator only"
+            "Skins: Creator only"
         );
 
         assert_eq!(
             token_series.is_mintable,
             true,
-            "Paras: already non-mintable"
+            "Skins: already non-mintable"
         );
 
         assert_eq!(
             token_series.metadata.copies,
             None,
-            "Paras: decrease supply if copies not null"
+            "Skins: decrease supply if copies not null"
         );
 
         token_series.is_mintable = false;
@@ -496,7 +496,7 @@ impl Contract {
         assert_eq!(
             env::predecessor_account_id(),
             token_series.creator_id,
-            "Paras: Creator only"
+            "Skins: Creator only"
         );
 
         let minted_copies = token_series.tokens.len();
@@ -504,7 +504,7 @@ impl Contract {
 
         assert!(
             (copies - decrease_copies.0) >= minted_copies,
-            "Paras: cannot decrease supply, already minted : {}", minted_copies
+            "Skins: cannot decrease supply, already minted : {}", minted_copies
         );
 
         let is_non_mintable = if (copies - decrease_copies.0) == minted_copies {
@@ -540,13 +540,13 @@ impl Contract {
         assert_eq!(
             env::predecessor_account_id(),
             token_series.creator_id,
-            "Paras: Creator only"
+            "Skins: Creator only"
         );
 
         assert_eq!(
             token_series.is_mintable,
             true,
-            "Paras: token series is not mintable"
+            "Skins: token series is not mintable"
         );
 
         if price.is_none() {
@@ -1096,16 +1096,16 @@ mod tests {
                 spec: NFT_METADATA_SPEC.to_string(),
                 name: "Triple Triad".to_string(),
                 symbol: "TRIAD".to_string(),
-                icon: Some(DATA_IMAGE_SVG_PARAS_ICON.to_string()),
-                base_uri: Some("https://ipfs.fleek.co/ipfs/".to_string()),
+                icon: Some(DATA_IMAGE_SVG_NEAR_ICON.to_string()),
+                base_uri: Some("https://ipfs.io/ipfs/".to_string()),
                 reference: None,
                 reference_hash: None,
             }
         );
         testing_env!(context.is_view(true).build());
         assert_eq!(contract.get_owner(), accounts(1).to_string());
-        assert_eq!(contract.nft_metadata().base_uri.unwrap(), "https://ipfs.fleek.co/ipfs/".to_string());
-        assert_eq!(contract.nft_metadata().icon.unwrap(), DATA_IMAGE_SVG_PARAS_ICON.to_string());
+        assert_eq!(contract.nft_metadata().base_uri.unwrap(), "https://ipfs.io/ipfs/".to_string());
+        assert_eq!(contract.nft_metadata().icon.unwrap(), DATA_IMAGE_SVG_NEAR_ICON.to_string());
     }
 
     fn create_series(
@@ -1253,7 +1253,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Paras: Token series is not mintable")]
+    #[should_panic(expected = "Skins: Token series is not mintable")]
     fn test_invalid_mint_non_mintable() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
@@ -1284,7 +1284,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Paras: Token series is not mintable")]
+    #[should_panic(expected = "Skins: Token series is not mintable")]
     fn test_invalid_mint_above_copies() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
@@ -1341,7 +1341,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Paras: cannot decrease supply, already minted : 2")]
+    #[should_panic(expected = "Skins: cannot decrease supply, already minted : 2")]
     fn test_invalid_decrease_copies() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
@@ -1374,7 +1374,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic( expected = "Paras: not for sale" )]
+    #[should_panic( expected = "Skins: not for sale" )]
     fn test_invalid_buy_price_null() {
         let (mut context, mut contract) = setup_contract();
         testing_env!(context
