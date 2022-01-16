@@ -1096,7 +1096,7 @@ mod tests {
     fn setup_contract() -> (VMContextBuilder, Contract) {
         let mut context = VMContextBuilder::new();
         testing_env!(context.predecessor_account_id(accounts(0)).build());
-        let contract = Contract::new_default_meta(accounts(0), accounts(4));
+        let contract = Contract::new_default_meta(accounts(0));
         (context, contract)
     }
 
@@ -1106,7 +1106,6 @@ mod tests {
         testing_env!(context.build());
         let contract = Contract::new(
             accounts(1),
-            accounts(4),
             NFTContractMetadata {
                 spec: NFT_METADATA_SPEC.to_string(),
                 name: "Triple Triad".to_string(),
