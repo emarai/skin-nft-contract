@@ -1,4 +1,4 @@
-use paras_nft_contract::ContractContract as Contract;
+use skin_nft_contract::ContractContract as Contract;
 use near_sdk_sim::{
     deploy, init_simulator, to_yocto, ContractAccount, UserAccount, DEFAULT_GAS
 };
@@ -15,13 +15,8 @@ pub const STORAGE_MINT_ESTIMATE: u128 = 11280000000000000000000;
 pub const STORAGE_CREATE_SERIES_ESTIMATE: u128 = 8540000000000000000000;
 pub const STORAGE_APPROVE: u128 = 2610000000000000000000;
 
-pub fn init() -> (UserAccount, ContractAccount<Contract>, UserAccount) {
+pub fn init() -> (UserAccount, ContractAccount<Contract>) {
     let root = init_simulator(None);
-
-    let treasury = root.create_user(
-        "treasury".to_string(),
-        to_yocto("100"),
-    );
 
     let nft_contract = deploy!(
         contract: Contract,
@@ -29,8 +24,7 @@ pub fn init() -> (UserAccount, ContractAccount<Contract>, UserAccount) {
         bytes: &NFT_WASM_BYTES,
         signer_account: root,
         init_method: new_default_meta(
-            root.valid_account_id(),
-            treasury.valid_account_id()
+            root.valid_account_id()
         )
     );
 
@@ -39,12 +33,12 @@ pub fn init() -> (UserAccount, ContractAccount<Contract>, UserAccount) {
         to_yocto("100"),
     );
 
-    (root, nft_contract, treasury)
+    (root, nft_contract)
 }
 
 #[test]
 fn simulate_create_new_series() {
-    let (root, nft, _) = init();
+    let (root, nft) = init();
 
     let initial_storage_usage = nft.account().unwrap().storage_usage;
 
@@ -75,7 +69,7 @@ fn simulate_create_new_series() {
 
 #[test]
 fn simulate_mint() {
-    let (root, nft, _) = init();
+    let (root, nft) = init();
 
     root.call(
         nft.account_id(),
@@ -154,7 +148,7 @@ fn simulate_mint() {
 
 #[test]
 fn simulate_approve() {
-    let (root, nft, _) = init();
+    let (root, nft) = init();
 
     let trst = root.create_user("trst".repeat(16), to_yocto("100"));
     root.call(
@@ -210,13 +204,12 @@ fn simulate_approve() {
 
 #[test]
 fn simulate_buy() {
-    let (root, nft, treasury) = init();
+    let (root, nft) = init();
 
     let alice = root.create_user("alice".to_string(), to_yocto("100"));
 
-    let treasury_balance = treasury.account().unwrap().amount;
 
-    alice.call(
+    root.call(
         nft.account_id(),
         "nft_create_series",
         &json!({
@@ -235,9 +228,9 @@ fn simulate_buy() {
         to_yocto("1")
     );
 
-    let alice_balance = alice.account().unwrap().amount;
+    let root_balance = root.account().unwrap().amount;
 
-    root.call(
+    alice.call(
         nft.account_id(),
         "nft_buy",
         &json!({
@@ -248,12 +241,9 @@ fn simulate_buy() {
         to_yocto("1") + STORAGE_MINT_ESTIMATE
     );
 
-    let for_treasury = (to_yocto("1") * 500) / 10_000;
-    let for_seller = to_yocto("1") - for_treasury;
+    let for_seller = to_yocto("1");
 
-    let diff_after_sell_treasury = treasury.account().unwrap().amount - treasury_balance;
-    let diff_after_sell_alice = alice.account().unwrap().amount - alice_balance;
+    let diff_after_sell_root = root.account().unwrap().amount - root_balance;
 
-    assert_eq!(for_treasury, diff_after_sell_treasury);
-    assert_eq!(for_seller, diff_after_sell_alice);
+    assert_eq!(for_seller, diff_after_sell_root);
 }
