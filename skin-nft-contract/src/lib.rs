@@ -322,11 +322,20 @@ impl Contract {
     pub fn nft_fuse(
         &mut self,
         token_ids: Vec<TokenId>,
-        target_token_series_id: TokenSeriesId
+        target_token_series_id: TokenSeriesId,
+        account_id: ValidAccountId,
     ) -> Option<TokenId> {
+
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.tokens.owner_id,
+            "Skins: Owner only"
+        );
+
         let token_series: TokenSeries = self.token_series_by_id.get(&target_token_series_id).expect("Skins: Token series not exist");
         let mut fuse_requirements = token_series.fuse_requirements.unwrap();
         for token_id in token_ids.clone() {
+            assert_eq!(self.tokens.owner_by_id.get(&token_id).unwrap(), account_id.to_string(), "Skins: token_id is not owned by account_id");
             let mut token_id_iter = token_id.split(TOKEN_DELIMETER);
             let token_series_id: TokenSeriesId = token_id_iter.next().unwrap().parse().unwrap();
             if fuse_requirements.contains(token_series_id.as_str()) {
@@ -337,7 +346,13 @@ impl Contract {
             for token_id in token_ids {
                 self.nft_burn(token_id);
             }
-            Some(self._nft_mint_series(target_token_series_id, env::predecessor_account_id()))
+            let token_id: TokenId = self._nft_mint_series(target_token_series_id, account_id.to_string());
+            NearEvent::log_nft_mint(
+                account_id.to_string(),
+                vec![token_id.clone()],
+                None
+            );
+            Some(token_id)
         } else {
             None
         }
