@@ -15,7 +15,7 @@ use near_sdk::{
     assert_one_yocto, env, ext_contract, near_bindgen, serde_json::json, AccountId, Balance,
     BorshStorageKey, Gas, PanicOnDefault, Promise, PromiseOrValue,
 };
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 pub mod event;
 pub use event::NearEvent;
@@ -85,7 +85,7 @@ pub struct TokenSeries {
     price: Option<Balance>,
     is_mintable: bool,
     royalty: HashMap<AccountId, u32>,
-    fuse_requirements: Option<Vec<HashSet<TokenSeriesId>>>,
+    fuse_requirements: Option<Vec<Vec<TokenSeriesId>>>,
     fuse_cost: Option<(AccountId, U128)>,
 }
 
@@ -170,7 +170,7 @@ impl Contract {
         token_metadata: TokenMetadata,
         price: Option<U128>,
         royalty: Option<HashMap<AccountId, u32>>,
-        fuse_requirements: Option<Vec<HashSet<TokenSeriesId>>>,
+        fuse_requirements: Option<Vec<Vec<TokenSeriesId>>>,
         fuse_cost: Option<(AccountId, U128)>,
     ) -> TokenSeriesJson {
         assert_eq!(
@@ -389,8 +389,11 @@ impl Contract {
                 );
                 let mut token_id_iter = token_id.split(TOKEN_DELIMETER);
                 let token_series_id: TokenSeriesId = token_id_iter.next().unwrap().parse().unwrap();
-                if fuse_requirement.contains(token_series_id.as_str()) {
-                    fuse_requirement.remove(token_series_id.as_str());
+                for (pos, token_series_id_req) in fuse_requirement.iter().enumerate() {
+                    if token_series_id == *token_series_id_req {
+                        fuse_requirement.remove(pos);
+                        break;
+                    }
                 }
             }
             if fuse_requirement.is_empty() {
