@@ -96,6 +96,8 @@ pub struct TokenSeriesJson {
     metadata: TokenMetadata,
     creator_id: AccountId,
     royalty: HashMap<AccountId, u32>,
+    fuse_requirements: Option<Vec<Vec<TokenSeriesId>>>,
+    fuse_cost: Option<(AccountId, U128)>,
 }
 
 near_sdk::setup_alloc!();
@@ -243,8 +245,8 @@ impl Contract {
                 price: price_res,
                 is_mintable: true,
                 royalty: royalty_res.clone(),
-                fuse_requirements,
-                fuse_cost,
+                fuse_requirements: fuse_requirements.clone(),
+                fuse_cost: fuse_cost.clone(),
             },
         );
 
@@ -270,6 +272,8 @@ impl Contract {
             metadata: token_metadata,
             creator_id: caller_id.into(),
             royalty: royalty_res,
+            fuse_requirements,
+            fuse_cost,
         }
     }
 
@@ -692,6 +696,22 @@ impl Contract {
         return price;
     }
 
+    pub fn change_fuse_requirements(
+        &mut self,
+        token_series_id: TokenSeriesId,
+        fuse_requirements: Option<Vec<Vec<TokenSeriesId>>>,
+        fuse_cost: Option<(AccountId, U128)>
+    ) {
+        let mut token_series = self.token_series_by_id.get(&token_series_id).unwrap();
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.tokens.owner_id,
+            "Skins: Owner only"
+        );
+        token_series.fuse_requirements = fuse_requirements;
+        token_series.fuse_cost = fuse_cost;
+        self.token_series_by_id.insert(&token_series_id, &token_series);
+    }
     #[payable]
     pub fn nft_burn(&mut self, token_id: TokenId) {
         assert_one_yocto();
@@ -738,6 +758,8 @@ impl Contract {
             metadata: token_series.metadata,
             creator_id: token_series.creator_id,
             royalty: token_series.royalty,
+            fuse_requirements: token_series.fuse_requirements,
+            fuse_cost: token_series.fuse_cost
         }
     }
 
@@ -775,6 +797,8 @@ impl Contract {
                 metadata: token_series.metadata,
                 creator_id: token_series.creator_id,
                 royalty: token_series.royalty,
+                fuse_requirements: token_series.fuse_requirements,
+                fuse_cost: token_series.fuse_cost
             })
             .collect()
     }

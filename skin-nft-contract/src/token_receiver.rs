@@ -35,11 +35,15 @@ impl FungibleTokenReceiver for Contract {
         );
 
         assert!(
-            amount.0 > fuse_cost.1.0,
+            amount.0 >= fuse_cost.1.0,
             "Skin: amount is lower than requirement"
         );
 
-        self.internal_fuse(token_ids, target_token_series_id, sender_id.to_string());
-        PromiseOrValue::Value(U128(0))
+        let result = self.internal_fuse(token_ids, target_token_series_id, sender_id.to_string());
+        if result.is_some() {
+            PromiseOrValue::Value(U128(0))
+        } else {
+            panic!("Skin: not minted");
+        }
     }
 }
