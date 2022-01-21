@@ -351,11 +351,12 @@ impl Contract {
 
         let random_loot = self.random_loot.as_ref().unwrap().clone();
         let rand: u8 = *env::random_seed().get(0).unwrap();
-        if rand < 128 {
-            self._nft_mint_series(random_loot[0].clone(), receiver_id);
+        let token_id= if rand < 128 {
+            self._nft_mint_series(random_loot[0].clone(), receiver_id.clone())
         } else {
-            self._nft_mint_series(random_loot[1].clone(), receiver_id);
-        }
+            self._nft_mint_series(random_loot[1].clone(), receiver_id.clone())
+        };
+        NearEvent::log_nft_mint(receiver_id.to_string(), vec![token_id.clone()], None);
     }
 
     // WARNING: NO GUARD
