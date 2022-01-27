@@ -283,8 +283,6 @@ impl Contract {
         token_series_id: TokenSeriesId,
         receiver_id: ValidAccountId,
     ) -> TokenId {
-        let initial_storage_usage = env::storage_usage();
-
         let token_series = self
             .token_series_by_id
             .get(&token_series_id)
@@ -299,8 +297,6 @@ impl Contract {
         let token_id: TokenId = self._nft_mint_series(token_series_id, receiver_id.to_string());
 
         Promise::new(token_series.creator_id).transfer(price);
-
-        refund_deposit(env::storage_usage() - initial_storage_usage, price);
 
         NearEvent::log_nft_mint(
             receiver_id.to_string(),
@@ -817,7 +813,7 @@ impl Contract {
         token_series_id: TokenSeriesId,
         from_index: Option<U128>,
         limit: Option<u64>,
-    ) -> Vec<Token> {
+    ) -> Vec<Option<Token>> {
         let start_index: u128 = from_index.map(From::from).unwrap_or_default();
         let tokens = self
             .token_series_by_id
@@ -835,7 +831,7 @@ impl Contract {
             .iter()
             .skip(start_index as usize)
             .take(limit)
-            .map(|token_id| self.nft_token(token_id).unwrap())
+            .map(|token_id| self.nft_token(token_id))
             .collect()
     }
 
@@ -1046,7 +1042,7 @@ impl Contract {
         account_id: ValidAccountId,
         from_index: Option<U128>,
         limit: Option<u64>,
-    ) -> Vec<Token> {
+    ) -> Vec<Option<Token>> {
         let tokens_per_owner = self.tokens.tokens_per_owner.as_ref().expect(
             "Could not find tokens_per_owner when calling a method on the enumeration standard.",
         );
@@ -1066,7 +1062,7 @@ impl Contract {
             .iter()
             .skip(start_index as usize)
             .take(limit)
-            .map(|token_id| self.nft_token(token_id).unwrap())
+            .map(|token_id| self.nft_token(token_id))
             .collect()
     }
 
