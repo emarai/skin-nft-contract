@@ -26,18 +26,18 @@ NEAR_ENV=testnet near call --accountId dev-1642333353587-87737921984816 dev-1642
 
 ### NFT create series (Skin A)
 ```sh
-NEAR_ENV=testnet near call --accountId dev-1642752379564-12780405697962 dev-1642752379564-12780405697962 nft_create_series '{"token_metadata":{"title":"Skin A","media":"bafybeidzcan4nzcz7sczs4yzyxly4galgygnbjewipj6haco4kffoqpkiy","copies":1000,"fuse_requirements":[["2","3","3","3"]],"fuse_cost":["dev-1642749960038-75584185908370","100000000000000000000"]}}' --depositYocto 8540000000000000000000
+NEAR_ENV=testnet near call --accountId dev-1642752379564-12780405697962 dev-1642752379564-12780405697962 nft_create_series '{"token_metadata":{"title":"Skin A","media":"bafybeidzcan4nzcz7sczs4yzyxly4galgygnbjewipj6haco4kffoqpkiy","copies":1000},"fuse_requirements":[["2","3"],["3","3"]],"fuse_cost":["dev-1642749960038-75584185908370","100000000000000000000"]}' --depositYocto 8540000000000000000000
 ```
 
 ### NFT create series (Skin B)
 ```sh
-NEAR_ENV=testnet near call --accountId dev-1642752379564-12780405697962 dev-1642752379564-12780405697962 nft_create_series '{"token_metadata":{"title":"Skin B","media":"bafybeibv6etj7sncwkl5nilpzkkcihnttijrlvlcialcafha4punocey7y","copies": 1000,"fuse_requirements":[["1","3","1","1"]],"fuse_cost":["dev-1642749960038-75584185908370","100000000000000000000"]}
+NEAR_ENV=testnet near call --accountId dev-1642752379564-12780405697962 dev-1642752379564-12780405697962 nft_create_series '{"token_metadata":{"title":"Skin B","media":"bafybeibv6etj7sncwkl5nilpzkkcihnttijrlvlcialcafha4punocey7y","copies": 1000},"fuse_requirements":[["1","3"],["1","1"]],"fuse_cost":["dev-1642749960038-75584185908370","100000000000000000000"]}
 }' --depositYocto 8540000000000000000000
 ```
 
 ### NFT create series (Skin C)
 ```sh
-NEAR_ENV=testnet near call --accountId dev-1642752379564-12780405697962 dev-1642752379564-12780405697962 nft_create_series '{"token_metadata":{"title":"Skin C","media":"bafybeiendtn4cfce5iqgof4jlnpt67kvqcez4mmbihmbuwizy36dwmcj3i","copies": 1000},"fuse_requirements":[["1","2","2","2"]],"fuse_cost":["dev-1642749960038-75584185908370","100000000000000000000"]}' --depositYocto 8540000000000000000000
+NEAR_ENV=testnet near call --accountId dev-1642752379564-12780405697962 dev-1642752379564-12780405697962 nft_create_series '{"token_metadata":{"title":"Skin C","media":"bafybeiendtn4cfce5iqgof4jlnpt67kvqcez4mmbihmbuwizy36dwmcj3i","copies": 1000},"fuse_requirements":[["1","2"],["2","2"]],"fuse_cost":["dev-1642749960038-75584185908370","100000000000000000000"]}' --depositYocto 8540000000000000000000
 ```
 
 ### NFT mint series (Creator only)
