@@ -345,7 +345,7 @@ impl Contract {
         self.random_loot = Some(token_series_ids);
     }
 
-    // WARNING: NO GUARD
+    #[payable]
     pub fn nft_random_loot(&mut self) {
         let receiver_id= env::predecessor_account_id();
 
