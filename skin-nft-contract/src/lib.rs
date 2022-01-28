@@ -346,7 +346,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_random_loot(&mut self) {
+    pub fn nft_random_loot(&mut self) -> TokenId {
         let receiver_id= env::predecessor_account_id();
 
         let random_loot = self.random_loot.as_ref().unwrap().clone();
@@ -357,6 +357,7 @@ impl Contract {
             self._nft_mint_series(random_loot[1].clone(), receiver_id.clone())
         };
         NearEvent::log_nft_mint(receiver_id.to_string(), vec![token_id.clone()], None);
+        token_id
     }
 
     // WARNING: NO GUARD
