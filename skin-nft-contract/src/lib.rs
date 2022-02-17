@@ -564,6 +564,23 @@ impl Contract {
         token_id
     }
 
+    pub fn nft_set_metadata(&mut self, token_series_id: TokenSeriesId, token_metadata: TokenMetadata) {
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.tokens.owner_id,
+            "Skins: Owner only"
+        );
+
+        let mut token_series = self
+            .token_series_by_id
+            .get(&token_series_id)
+            .expect("Token series not exist");
+
+        token_series.metadata = token_metadata;
+
+        self.token_series_by_id.insert(&token_series_id, &token_series);
+    }
+
     #[payable]
     pub fn nft_set_series_non_mintable(&mut self, token_series_id: TokenSeriesId) {
         assert_one_yocto();
@@ -572,6 +589,7 @@ impl Contract {
             .token_series_by_id
             .get(&token_series_id)
             .expect("Token series not exist");
+
         assert_eq!(
             env::predecessor_account_id(),
             token_series.creator_id,
